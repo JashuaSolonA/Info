@@ -1,0 +1,208 @@
+<p-toast></p-toast>
+
+<div class="card">
+  <p-toolbar styleClass="p-mb-4">
+    <ng-template pTemplate="left">
+      <button
+        pButton
+        pRipple
+        label="Nuevo"
+        icon="pi pi-plus"
+        class="p-button-success p-mr-2"
+        (click)="openNew()"
+      ></button>
+      <button
+        pButton
+        pRipple
+        [label]="Eliminar"
+        icon="pi pi-trash"
+        class="p-button-danger"
+        (click)="deleteSelectedClientes()"
+        [disabled]="!selectedClientes || !selectedClientes.length"
+      ></button>
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    #dt
+    [value]="clientes"
+    [rows]="10"
+    [paginator]="true"
+    [globalFilterFields]="[
+      'id',
+      'dni',
+      'apellidos',
+      'nombres',
+      'edad',
+      'salarios'
+    ]"
+    [(selection)]="selectedClientes"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Mostrando {first} - {last} de {totalRecords} clientes"
+    [showCurrentPageReport]="true"
+  >
+    <ng-template pTemplate="caption">
+      <div class="p-d-flex p-ai-center p-jc-between">
+        <h5 class="p-m-0">LISTA DE CLIENTES</h5>
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="text"
+            (input)="dt.filterGlobal($event.target.value, 'contains')"
+            placeholder="Buscar..."
+          />
+        </span>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 3rem">
+          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+        </th>
+        <th pSortableColumn="id">ID <p-sortIcon field="id"></p-sortIcon></th>
+        <th pSortableColumn="dni">DNI <p-sortIcon field="dni"></p-sortIcon></th>
+        <th pSortableColumn="apellidos">
+          APELLIDOS <p-sortIcon field="apellidos"></p-sortIcon>
+        </th>
+        <th pSortableColumn="nombres">
+          NOMBRES <p-sortIcon field="nombres"></p-sortIcon>
+        </th>
+        <th pSortableColumn="edad">
+          EDAD <p-sortIcon field="edad"></p-sortIcon>
+        </th>
+        <th pSortableColumn="salario">
+          SALARIO <p-sortIcon field="salario"></p-sortIcon>
+        </th>
+        <th></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-cliente>
+      <tr>
+        <td>
+          <p-tableCheckbox [value]="cliente"></p-tableCheckbox>
+        </td>
+        <td>{{ cliente.id }}</td>
+        <td>{{ cliente.dni }}</td>
+        <td>{{ cliente.apellidos }}</td>
+        <td>{{ cliente.nombres }}</td>
+        <td>{{ cliente.edad }}</td>
+        <td>{{ cliente.salario | currency: 'USD' }}</td>
+        <td>
+          <button
+            pButton
+            pRipple
+            icon="pi pi-pencil"
+            class="p-button-rounded p-button-success p-mr-2"
+            (click)="editCliente(cliente)"
+          ></button>
+          <button
+            pButton
+            pRipple
+            icon="pi pi-trash"
+            class="p-button-rounded p-button-warning"
+            (click)="deleteCliente(cliente)"
+          ></button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="summary">
+      <div class="p-d-flex p-ai-center p-jc-between">
+        En total hay {{ clientes ? clientes.length : 0 }} clientes.
+      </div>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog
+  [(visible)]="clienteDialog"
+  [style]="{ width: '450px' }"
+  header="Detalles del cliente"
+  [modal]="true"
+  styleClass="p-fluid"
+>
+  <ng-template pTemplate="content">
+    <div class="p-field">
+      <label for="dni">DNI</label>
+      <input
+        type="text"
+        pInputText
+        id="dni"
+        [(ngModel)]="cliente.dni"
+        required
+        autofocus
+      />
+      <small class="p-invalid" *ngIf="submitted && !cliente.dni"
+        >Es necesario escribir el DNI del cliente</small
+      >
+    </div>
+    <div class="p-field">
+      <label for="apellidos">APELLIDOS</label>
+      <input
+        type="text"
+        pInputText
+        id="apellidos"
+        [(ngModel)]="cliente.apellidos"
+        required
+        autofocus
+      />
+      <small class="p-invalid" *ngIf="submitted && !cliente.apellidos"
+        >Es necesario escribir los apellidos del cliente</small
+      >
+    </div>
+    <div class="p-field">
+      <label for="nombres">NOMBRES</label>
+      <input
+        type="text"
+        pInputText
+        id="nombres"
+        [(ngModel)]="cliente.nombres"
+        required
+        autofocus
+      />
+      <small class="p-invalid" *ngIf="submitted && !cliente.nombres"
+        >Es necesario escribir los nombres del cliente</small
+      >
+    </div>
+    <div class="p-formgrid p-grid">
+      <div class="p-field p-col">
+        <label for="edad">EDAD</label>
+        <p-inputNumber id="edad" [(ngModel)]="cliente.edad"></p-inputNumber>
+      </div>
+      <div class="p-field p-col">
+        <label for="salario">SALARIO</label>
+        <p-inputNumber
+          id="salario"
+          [(ngModel)]="cliente.salario"
+          mode="currency"
+          currency="USD"
+          locale="en-US"
+        ></p-inputNumber>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      pRipple
+      label="Cancel"
+      icon="pi pi-times"
+      class="p-button-text"
+      (click)="hideDialog()"
+    ></button>
+    <button
+      pButton
+      pRipple
+      label="Save"
+      icon="pi pi-check"
+      class="p-button-text"
+      (click)="saveCliente()"
+    ></button>
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>
+
+<app-chart></app-chart>
